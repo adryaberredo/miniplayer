@@ -20,3 +20,17 @@ test: $(BUILD)/test_musica $(BUILD)/test_lse $(BUILD)/test_pilha $(BUILD)/test_f
 	@set -e; for t in $(BUILD)/test_musica $(BUILD)/test_lse $(BUILD)/test_pilha $(BUILD)/test_fila; do echo "== $$t =="; ./$$t; done
 clean:
 	rm -rf $(BUILD)
+
+# Descobre automaticamente as missões instaladas.
+ARQUIVOS_MISSOES := $(wildcard missoes/M*/Makefile.incremental)
+
+# Define os nomes dos testes, inclusive o da M02.
+TESTES_MISSOES := $(patsubst missoes/M%/Makefile.incremental,test_m%,$(ARQUIVOS_MISSOES))
+
+# Incorpora as regras de cada missão, sem alterar seus arquivos.
+-include $(ARQUIVOS_MISSOES)
+
+.PHONY: test_missoes
+
+# Executa todos os testes das missões instaladas.
+test_missoes: $(TESTES_MISSOES)
