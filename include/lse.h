@@ -13,4 +13,7 @@ void *lse_buscar(const t_lse *lista, const void *chave, t_comparador comparar);
 void *lse_remover(t_lse *lista, const void *chave, t_comparador comparar);
 int lse_inserir_ordenado(t_lse *lista, void *carga, t_comparador comparar);
 void lse_destruir(t_lse *lista, void (*destruir_carga)(void *));
+/* M03: callback de percurso. Recebe a carga de cada no, do inicio ao fim. */
+typedef void (*t_lse_visitar)(void *carga);
+void lse_percorrer(const t_lse *lista, t_lse_visitar cb_visitar);
 #endif

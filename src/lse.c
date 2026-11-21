@@ -48,11 +48,95 @@ void lse_destruir(t_lse *l, void (*destruir)(void *)) {
     free(l);
 }
 
-/* Stubs intencionalmente incompletos; testes devem falhar ate implementacao. */
-int lse_inserir_inicio(t_lse *l, void *c) { (void)l; (void)c; return 0; } /* TODO M04 */
-int lse_inserir_fim(t_lse *l, void *c) { (void)l; (void)c; return 0; } /* TODO M04 */
-void *lse_remover_inicio(t_lse *l) { (void)l; return NULL; } /* TODO M04 */
-void *lse_buscar(const t_lse *l, const void *ch, t_comparador cmp) { (void)l; (void)ch; (void)cmp; return NULL; } /* TODO M04 */
-void *lse_remover(t_lse *l, const void *ch, t_comparador cmp) { (void)l; (void)ch; (void)cmp; return NULL; } /* TODO M04 */
-int lse_inserir_ordenado(t_lse *l, void *c, t_comparador cmp) { (void)l; (void)c; (void)cmp; return 0; } /* TODO M05 */
+/* M03: cria um no isolado (prox == NULL). Funcao interna: a aplicacao
+ * nunca ve t_elem. O no guarda o ponteiro da carga; nao copia a carga. */
+static t_elem *criar_no(void *carga) {
+    t_elem *n = malloc(sizeof *n);
+    if (n == NULL) return NULL;
+    n->carga = carga;
+    n->prox = NULL;
+    return n;
+}
 
+/* M03: insere no inicio em O(1). Retorna 1 no sucesso; 0 se lista == NULL
+ * ou malloc falhar (lista intacta). Carga NULL e permitida. */
+int lse_inserir_inicio(t_lse *l, void *carga) {
+    if (l == NULL) return 0;
+    t_elem *n = criar_no(carga);
+    if (n == NULL) return 0;
+    n->prox = l->inicio;   /* 1) novo no aponta para o antigo primeiro */
+    l->inicio = n;         /* 2) inicio passa a ser o novo no */
+    l->tamanho++;
+    return 1;
+}
+
+/* M03: visita as cargas do inicio ao fim. Nao faz nada se lista ou
+ * callback forem NULL. Nao altera a lista. */
+void lse_percorrer(const t_lse *l, t_lse_visitar visitar) {
+    if (l == NULL || visitar == NULL) return;
+    for (t_elem *atual = l->inicio; atual != NULL; atual = atual->prox) {
+        visitar(atual->carga);
+    }
+}
+
+/* M04: insere no fim em O(n) (ainda nao ha ponteiro fim). Retorna 1 no
+ * sucesso; 0 se lista == NULL ou malloc falhar. */
+int lse_inserir_fim(t_lse *l, void *carga) {
+    if (l == NULL) return 0;
+    t_elem *n = criar_no(carga);
+    if (n == NULL) return 0;
+    if (l->inicio == NULL) {
+        l->inicio = n;                 /* lista vazia: o no e o primeiro */
+    } else {
+        t_elem *ultimo = l->inicio;
+        while (ultimo->prox != NULL) ultimo = ultimo->prox;
+        ultimo->prox = n;
+    }
+    l->tamanho++;
+    return 1;
+}
+
+/* M04: remove o primeiro no e devolve a carga (so o no e liberado).
+ * NULL se a lista for NULL ou vazia. */
+void *lse_remover_inicio(t_lse *l) {
+    if (l == NULL || l->inicio == NULL) return NULL;
+    t_elem *no = l->inicio;
+    void *carga = no->carga;
+    l->inicio = no->prox;
+    free(no);
+    l->tamanho--;
+    return carga;
+}
+
+/* M04: devolve a primeira carga com comparar(carga, chave) == 0.
+ * NULL se nao achar ou se lista/comparar forem NULL. Nao altera a lista. */
+void *lse_buscar(const t_lse *l, const void *chave, t_comparador comparar) {
+    if (l == NULL || comparar == NULL) return NULL;
+    for (t_elem *atual = l->inicio; atual != NULL; atual = atual->prox) {
+        if (comparar(atual->carga, chave) == 0) return atual->carga;
+    }
+    return NULL;
+}
+
+/* M04: remove so o PRIMEIRO no correspondente; libera apenas o no e
+ * devolve a carga (quem chamou decide quando liberar a carga).
+ * NULL se nao achar ou se lista/comparar forem NULL. */
+void *lse_remover(t_lse *l, const void *chave, t_comparador comparar) {
+    if (l == NULL || comparar == NULL) return NULL;
+    t_elem *anterior = NULL;
+    t_elem *atual = l->inicio;
+    while (atual != NULL && comparar(atual->carga, chave) != 0) {
+        anterior = atual;
+        atual = atual->prox;
+    }
+    if (atual == NULL) return NULL;            /* chave inexistente */
+    if (anterior == NULL) l->inicio = atual->prox;   /* removeu a cabeca */
+    else anterior->prox = atual->prox;               /* meio ou cauda */
+    void *carga = atual->carga;
+    free(atual);
+    l->tamanho--;
+    return carga;
+}
+
+/* Stub intencionalmente incompleto; pertence a M05. */
+int lse_inserir_ordenado(t_lse *l, void *c, t_comparador cmp) { (void)l; (void)c; (void)cmp; return 0; } /* TODO M05 */

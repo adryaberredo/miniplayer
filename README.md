@@ -9,7 +9,8 @@ Projeto integrador progressivo, em duplas, em C. Reprodução **simulada**.
 
 ## Estado atual
 - **M01 concluída:** `musica_criar` e `musica_destruir` implementadas em `src/musica.c`; `test_musica` passa.
-- Os demais testes (`test_lse`, `test_pilha`, `test_fila`) seguem falhando de propósito até as missões correspondentes.
+- **M02, M03 e M04 concluídas:** `lse_criar/tamanho/primeiro/destruir`, `lse_inserir_inicio`, `lse_percorrer`, `lse_inserir_fim`, `lse_buscar`, `lse_remover` e `lse_remover_inicio` implementadas em `src/lse.c`. Rode `make test_missoes` (ou `make test_m02`, `make test_m03`, `make test_m04`); `test_lse` também passa.
+- `lse_inserir_ordenado` (M05), `test_pilha` e `test_fila` seguem falhando de propósito até as missões correspondentes.
 - Como executar (a partir da pasta `miniplayer/`): `make build/test_musica && ./build/test_musica`.
 
 ## Contratos
